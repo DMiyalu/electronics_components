@@ -1,3 +1,4 @@
+import 'package:electronics_components/QR-Code/qr_code.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
@@ -12,8 +13,16 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Text('Electronics Components')
+        child: TextButton(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => QRCode()),
+          ),
+          child: Text('Electronics Components'))
       )
     );
   }
 }
+// NFC
+// Test. 1. Active/Deactive bluetooth
+// Test. 2. Play Music
