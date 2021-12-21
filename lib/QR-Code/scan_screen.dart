@@ -22,7 +22,7 @@ class _QRScanPageState extends State<QRScanPage> {
                 'Resultat',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.white54,
+                  color: Colors.black,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -32,7 +32,7 @@ class _QRScanPageState extends State<QRScanPage> {
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Colors.black,
                 ),
               ),
               SizedBox(height: 72),
