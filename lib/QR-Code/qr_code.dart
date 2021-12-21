@@ -1,4 +1,5 @@
 import 'package:electronics_components/QR-Code/generate_qrcode.dart';
+import 'package:electronics_components/QR-Code/scan_screen.dart';
 import 'package:flutter/material.dart';
 
 class QRCode extends StatefulWidget {
@@ -29,7 +30,12 @@ class _QRCodeState extends State<QRCode> {
                 ),
                 child: Text('Generate QR-Code')),
               SizedBox(height: 30),
-              Text('Scan QR-Code'),
+              TextButton(
+                onPressed: () =>  Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => QRScanPage()),
+                ),
+                child: Text('Scan QR-Code')),
               SizedBox(height: 30),
             ],
           ),
