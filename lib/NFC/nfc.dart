@@ -10,26 +10,36 @@ class Nfc extends StatefulWidget {
 }
 
 class _NfcState extends State<Nfc> {
-  void startNfcProcess() async {
+  Future<void> startNfcProcess() async {
+    print('read process');
+
     bool isAvailable = await NfcManager.instance.isAvailable();
 
-    // Start Session
-    NfcManager.instance.startSession(
-      onDiscovered: (NfcTag tag) async {
-        print('nfc tag: ${tag.data}');
+    if (isAvailable) {
+      print('available');
+      NfcManager.instance.startSession(
+        onDiscovered: (NfcTag tag) async {
+          print('nfc tag: ${tag.data}');
 
-        Ndef? ndef = Ndef.from(tag);
-        if (ndef == null) {
-          print('Tag is not compatible with NDEF');
-          return;
-        }
+          Ndef? ndef = Ndef.from(tag);
+          if (ndef == null) {
+            print('Tag is not compatible with NDEF');
+            return;
+          }
 
-        print('ndef value: ${ndef.cachedMessage}');
-      },
-    );
+          print('ndef value: ${ndef.cachedMessage}');
+        },
+      );
+      return;
+    }
 
-    // Stop Session
-    NfcManager.instance.stopSession();
+    print('unavailable');
+
+    // // Start Session
+
+
+    // // Stop Session
+    // NfcManager.instance.stopSession();
   }
 
   @override

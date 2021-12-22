@@ -37,7 +37,7 @@ class _HomeState extends State<Home> {
 // Test. 2. Play Music
 
 Widget customButton(context, {required String text,
-  Function? onPressed}) {
+  required Function onPressed}) {
   return TextButton(
     style: ButtonStyle(
       backgroundColor: MaterialStateProperty.all(Colors.blue),
@@ -46,6 +46,6 @@ Widget customButton(context, {required String text,
       ),
 
     ),
-    onPressed: onPressed!(),
+    onPressed: () => onPressed(),
     child: Text(text, style: TextStyle(color: Colors.white)));
 }
