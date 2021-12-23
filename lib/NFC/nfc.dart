@@ -1,4 +1,4 @@
-import 'package:electronics_components/home.dart';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:nfc_manager/nfc_manager.dart';
 
@@ -10,49 +10,144 @@ class Nfc extends StatefulWidget {
 }
 
 class _NfcState extends State<Nfc> {
-  Future<void> startNfcProcess() async {
-    print('read process');
+  ValueNotifier<dynamic> result = ValueNotifier(null);
+  ValueNotifier<dynamic> tagValue = ValueNotifier(null);
+  ValueNotifier<dynamic> entries = ValueNotifier(null);
+  ValueNotifier<dynamic> handle = ValueNotifier(null);
 
-    bool isAvailable = await NfcManager.instance.isAvailable();
-
-    if (isAvailable) {
-      print('available');
-      NfcManager.instance.startSession(
-        onDiscovered: (NfcTag tag) async {
-          print('nfc tag: ${tag.data}');
-
-          Ndef? ndef = Ndef.from(tag);
-          if (ndef == null) {
-            print('Tag is not compatible with NDEF');
-            return;
-          }
-
-          print('ndef value: ${ndef.cachedMessage}');
-        },
-      );
-      return;
-    }
-
-    print('unavailable');
-
-    // // Start Session
-
-
-    // // Stop Session
-    // NfcManager.instance.stopSession();
+  valueListner(valueListenable, String? textError) {
+    return ValueListenableBuilder<dynamic>(
+      valueListenable: valueListenable,
+      builder: (context, value, _) => Column(
+        children: [
+          Text('${value ?? textError}'),
+          SizedBox(height: 30),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-          child: SingleChildScrollView(
-        child: Column(children: [
-          customButton(context,
-              text: "Start Nfc Process", onPressed: () => startNfcProcess()),
-          Text('NFC')
-        ]),
-      )),
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: Text('NfcManager Plugin Example')),
+        body: SafeArea(
+          child: FutureBuilder<bool>(
+            future: NfcManager.instance.isAvailable(),
+            builder: (context, ss) => ss.data != true
+                ? Center(child: Text('NfcManager.isAvailable(): ${ss.data}'))
+                : Flex(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    direction: Axis.vertical,
+                    children: [
+                      Flexible(
+                        flex: 2,
+                        child: Container(
+                          margin: EdgeInsets.all(4),
+                          constraints: BoxConstraints.expand(),
+                          decoration: BoxDecoration(border: Border.all()),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                valueListner(result, 'No result data'),
+                                SizedBox(height: 30),
+                                valueListner(entries, 'No result entries'),
+                                SizedBox(height: 30),
+                                valueListner(tagValue, 'No result type'),
+                                SizedBox(height: 30),
+                                valueListner(handle, 'No result handle'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Flexible(
+                        flex: 3,
+                        child: GridView.count(
+                          padding: EdgeInsets.all(4),
+                          crossAxisCount: 2,
+                          childAspectRatio: 4,
+                          crossAxisSpacing: 4,
+                          mainAxisSpacing: 4,
+                          children: [
+                            ElevatedButton(
+                                child: Text('Tag Read'), onPressed: _tagRead),
+                            ElevatedButton(
+                                child: Text('Ndef Write'),
+                                onPressed: _ndefWrite),
+                            ElevatedButton(
+                                child: Text('Ndef Write Lock'),
+                                onPressed: _ndefWriteLock),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        ),
+      ),
     );
+  }
+
+  void _tagRead() {
+    NfcManager.instance.startSession(onDiscovered: (NfcTag tag) async {
+      result.value = tag.data;
+      entries.value = tag.data.values;
+      entries.value = tag.handle;
+      tagValue.value = tag;
+      NfcManager.instance.stopSession();
+    });
+  }
+
+  void _ndefWrite() {
+    NfcManager.instance.startSession(onDiscovered: (NfcTag tag) async {
+      var ndef = Ndef.from(tag);
+      if (ndef == null || !ndef.isWritable) {
+        result.value = 'Tag is not ndef writable';
+        NfcManager.instance.stopSession(errorMessage: result.value);
+        return;
+      }
+
+      NdefMessage message = NdefMessage([
+        NdefRecord.createText('Bienvenue chez AgroMwinda. Test lecture NFC!'),
+        NdefRecord.createUri(Uri.parse('https://flutter.dev')),
+        NdefRecord.createMime(
+            'text/plain', Uint8List.fromList('Hello'.codeUnits)),
+        NdefRecord.createExternal(
+            'com.example', 'mytype', Uint8List.fromList('mydata'.codeUnits)),
+      ]);
+
+      try {
+        await ndef.write(message);
+        result.value = 'Success to "Ndef Write"';
+        NfcManager.instance.stopSession();
+      } catch (e) {
+        result.value = e;
+        NfcManager.instance.stopSession(errorMessage: result.value.toString());
+        return;
+      }
+    });
+  }
+
+  void _ndefWriteLock() {
+    NfcManager.instance.startSession(onDiscovered: (NfcTag tag) async {
+      var ndef = Ndef.from(tag);
+      if (ndef == null) {
+        result.value = 'Tag is not ndef';
+        NfcManager.instance.stopSession(errorMessage: result.value.toString());
+        return;
+      }
+
+      try {
+        await ndef.writeLock();
+        result.value = 'Success to "Ndef Write Lock"';
+        NfcManager.instance.stopSession();
+      } catch (e) {
+        result.value = e;
+        NfcManager.instance.stopSession(errorMessage: result.value.toString());
+        return;
+      }
+    });
   }
 }
