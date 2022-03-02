@@ -1,3 +1,4 @@
+import 'package:electronics_components/Camera/camera.dart';
 import 'package:electronics_components/NFC/nfc.dart';
 import 'package:electronics_components/QR-Code/qr_code.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,11 @@ class _HomeState extends State<Home> {
             onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => Nfc()),
+                  )),
+          customButton(context, text: "CAMERA",
+            onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Camera()),
                   )),
         ],
       ),
